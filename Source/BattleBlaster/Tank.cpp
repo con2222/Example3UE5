@@ -2,6 +2,9 @@
 
 
 #include "Tank.h"
+#include "Camera/CameraComponent.h"
+#include "InputMappingContext.h"
+#include "Kismet/GameplayStatics.h"
 
 ATank::ATank()
 {
@@ -16,14 +19,11 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
 
-	if (PlayerController) {
-		ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
-		if (LocalPlayer) {
-			UEnhancedInputLocalPlayerSubsystem* Subsystem;
-			Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
-			if (Subsystem) {
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer()) {
+
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer)) {
 				Subsystem->AddMappingContext(DefaultMappingContext, 0);
 			}
 		}
@@ -33,9 +33,51 @@ void ATank::BeginPlay()
 void ATank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController) {
+		FHitResult HitResult;
+		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
+		//HitResult.ImpactPoint;
+		DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.ImpactPoint, FColor(255, 0, 0), false, 0);
+
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 25.0f, 12, FColor::Red);
+	}
 }
 
+//Called to bind functionality to input
 void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (auto EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATank::MoveInput);
+
+		EIC->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATank::TurnInput);
+	}
+}
+
+void ATank::MoveInput(const FInputActionValue& Value)
+{
+	float InputValue = Value.Get<float>();
+
+	FVector DeltaLocation = FVector(0.0f, 0.0f, 0.0f);
+	if (GetWorld()) {
+		DeltaLocation.X = Speed * InputValue * GetWorld()->GetDeltaSeconds();
+	}
+
+	//DeltaLocation.X = Speed * InputValue * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
+
+	AddActorLocalOffset(DeltaLocation, true);
+
+}
+
+void ATank::TurnInput(const FInputActionValue& Value)
+{
+	float InputValue = Value.Get<float>();
+
+	FRotator DeltaRotation = FRotator(0.0f, 0.0f, 0.0f);
+	DeltaRotation.Yaw = TurnRate * InputValue * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
+
+
+	AddActorLocalRotation(DeltaRotation, true);
 }

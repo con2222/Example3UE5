@@ -6,14 +6,16 @@
 #include "BasePawn.h"
 
 #include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-
-#include "InputMappingContext.h"
 #include "EnhancedInputSubSystems.h"
 
+#include "InputAction.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
 
 #include "Tank.generated.h"
 
+class UCameraComponent;
+class UInputMappingContext;
 /**
  * 
  */
@@ -35,9 +37,24 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* TurnAction;
+
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
+
+	UPROPERTY(EditAnywhere)
+	float Speed = 300.0f;
+
+	UPROPERTY(EditAnywhere)
+	float TurnRate = 50.0f;
+
+	void MoveInput(const FInputActionValue& Value);
+	void TurnInput(const FInputActionValue& Value);
 };
