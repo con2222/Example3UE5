@@ -55,6 +55,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float TurnRate = 50.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* FireAction;
+
 	void MoveInput(const FInputActionValue& Value);
 	void TurnInput(const FInputActionValue& Value);
 };
