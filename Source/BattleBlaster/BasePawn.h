@@ -7,6 +7,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Projectile.h"
+#include "NiagaraFunctionLibrary.h"
 
 #include "BasePawn.generated.h"
 
@@ -39,6 +40,15 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* TurretMesh;
 
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* DeathEffect;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* ExplodeAudio;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> DeathCameraShakeClass;
+
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* ProjectileSpawnPoint;
 
@@ -49,4 +59,5 @@ public:
 
 	void Fire();
 
+	void HandleDestruction();
 };

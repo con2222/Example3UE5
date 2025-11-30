@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
+#include "BattleBlasterGameMode.h"
+
 #include "HealthComponent.generated.h"
 
 
@@ -29,6 +32,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	float Health;
+
+	ABattleBlasterGameMode* BattleBlasterGameMode;
 
 	UFUNCTION()
 	void OnDamageTaken(AActor* DamagedActor, float Damage, 

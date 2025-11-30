@@ -19,8 +19,8 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
-
+	PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController) {
 		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer()) {
 
 			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer)) {
@@ -28,21 +28,22 @@ void ATank::BeginPlay()
 			}
 		}
 	}
+
+	SetPlayerEnabled(false);
 }
 
 void ATank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController) {
 		FHitResult HitResult;
 		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		//HitResult.ImpactPoint;
-		DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.ImpactPoint, FColor(255, 0, 0), false, 0);
+		//DrawDebugLine(GetWorld(), GetActorLocation(), HitResult.ImpactPoint, FColor(255, 0, 0), false, 0);
 
 		RotateTurret(HitResult.ImpactPoint);
 
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 25.0f, 12, FColor::Red);
+		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 25.0f, 12, FColor::Red);
 	}
 }
 
@@ -84,4 +85,45 @@ void ATank::TurnInput(const FInputActionValue& Value)
 
 
 	AddActorLocalRotation(DeltaRotation, true);
+}
+
+void ATank::HandleDestruction() {
+	Super::HandleDestruction();
+
+	SetActorHiddenInGame(true);
+	UE_LOG(LogTemp, Display, TEXT("Tank Destruction"));
+	SetActorTickEnabled(false);
+	SetPlayerEnabled(false);
+	IsAlive = false;
+}
+
+void ATank::SetPlayerEnabled(bool Enabled)
+{
+	if (PlayerController) {
+		if (Enabled) {
+			EnableInput(PlayerController);
+		}
+		else {
+			DisableInput(PlayerController);
+		}
+	}
+
+	PlayerController->SetShowMouseCursor(Enabled);
+}
+
+void ATank::ResetFire()
+{
+	CanFire = true;
+}
+
+void ATank::Fire() {
+	if (CanFire == false) {
+		return;
+	}
+
+	Super::Fire();
+
+	CanFire = false;
+
+	GetWorldTimerManager().SetTimer(FireRateHandler, this, &ATank::ResetFire, FireRateDelay, false);
 }

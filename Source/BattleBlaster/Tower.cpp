@@ -22,7 +22,7 @@ void ATower::Tick(float DeltaTime)
 
 void ATower::CheckFireCondition()
 {
-	if (IsInFireRange()) {
+	if (Tank && Tank->IsAlive && IsInFireRange()) {
 		Fire();
 	}
 }
@@ -35,4 +35,12 @@ bool ATower::IsInFireRange()
 	else {
 		return false;
 	}
+}
+
+void ATower::HandleDestruction() {
+
+	Destroy();
+	Super::HandleDestruction();
+
+	UE_LOG(LogTemp, Display, TEXT("Tower HandleDestruction"));
 }

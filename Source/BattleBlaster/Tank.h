@@ -58,6 +58,24 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* FireAction;
 
+	APlayerController* PlayerController;
+
+	UPROPERTY(EditAnywhere)
+	float FireRateDelay = 1.0f;
+
+	bool CanFire = true;
+
+	FTimerHandle FireRateHandler;
+
 	void MoveInput(const FInputActionValue& Value);
 	void TurnInput(const FInputActionValue& Value);
+
+	void HandleDestruction();
+	void SetPlayerEnabled(bool Enabled);
+
+	void ResetFire();
+
+	void Fire();
+
+	bool IsAlive = true;
 };
